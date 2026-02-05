@@ -18,7 +18,7 @@ userRouter
         status: "success",
         msg: res
       }
-      resp.status(201).json(respObj)
+      resp.status(200).json(respObj)
     })
   })
   .get('/:username', (req, resp, next) => { // Express URL params - https://expressjs.com/en/guide/routing.html
