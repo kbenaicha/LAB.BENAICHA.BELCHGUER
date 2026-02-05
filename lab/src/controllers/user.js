@@ -5,44 +5,34 @@ module.exports = {
     // Check parameters
     if(!user.username)
       return callback(new Error("Wrong user parameters"), null)
-
     // Create User schema
     const userObj = {
       firstname: user.firstname,
       lastname: user.lastname,
     }
-
-    // Save to DB
-    // TODO check if user already exists
-    db.hmset(user.username, userObj, (err, res) => {
+    // Check if user already exists
+    db.hgetall(user.username, function(err, res) {
       if (err) return callback(err, null)
-      callback(null, res) // Return callback
+      if (!res) {
+        // Save to DB
+        db.hmset(user.username, userObj, (err, res) => {
+          if (err) return callback(err, null)
+          callback(null, res) // Return callback
+        })
+      } else {
+        callback(new Error("User already exists"), null)
+      }
     })
   },
-
   get: (username, callback) => {
-    // Check parameters
-    if (!username) {
-      return callback(new Error("Wrong user parameters"), null)
-    }
-
-    // Read user from DB (Redis hash)
-    db.hgetall(username, (err, res) => {
+    if(!username)
+      return callback(new Error("Username must be provided"), null)
+    db.hgetall(username, function(err, res) {
       if (err) return callback(err, null)
-
-      // If user doesn't exist, Redis returns null
-      if (!res) {
-        return callback(new Error("User not found"), null)
-      }
-
-      // Rebuild full user object (include username)
-      const userObj = {
-        username: username,
-        firstname: res.firstname,
-        lastname: res.lastname
-      }
-
-      callback(null, userObj)
+      if (res)
+        callback(null, res)
+      else
+        callback(new Error("User doesn't exists"), null)
     })
   }
 }
