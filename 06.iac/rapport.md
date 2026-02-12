@@ -126,3 +126,82 @@ Run 'do-release-upgrade' to upgrade to it.
 
 Last login: Thu Feb 12 14:31:03 2026 from 10.0.2.2
 vagrant@ubuntu:~$ 
+
+***Part 2. Declarative - GitLab installation using Vagrant and Ansible Provisioner***
+
+Nous allons configurer un serveur sous Linux pour installer et exécuter GitLab.
+
+Nous utiliserons le provisionneur `ansible_local` (https://www.vagrantup.com/docs/provisioning/ansible_local.html) qui installera Ansible sur une machine virtuelle Linux générique (distribution `generic/rocky8`) créée avec Vagrant (https://www.vagrantup.com/). Ainsi, Ansible n'est pas nécessaire sur votre système d'exploitation hôte !
+
+### 1. Prepare a virtual environment
+
+Nous allons installer GitLab sur la machine virtuelle `generic/rocky8`. Lors de la première installation d'un nouveau logiciel dans un environnement de test, nous procédons manuellement pour tester chaque étape. Une fois le processus d'installation validé, nous l'automatisons à l'aide d'outils comme Vagrant et Ansible.
+
+Nous irons dans le répertoire `lab/part-2` et consultez le fichier `Vagrantfile` ainsi que le fichier `playbooks/run.yml`.
+
+Nous avons adapter le Vagrantfile pour qu’il fonctionne correctement sur l'environnement personnel (Mac M2, architecture ARM) :
+
+- L’image generic/rocky8 est prévue pour x86_64 et ne fonctionne pas sur Apple Silicon. Je l’ai remplacée par perk/ubuntu-2204-arm64, compatible ARM et déjà testée dans la partie 1.
+- VirtualBox est instable sur Mac M2 et VMware n’est pas installé. QEMU fonctionne correctement sur cette architecture, j’ai donc configuré Vagrant pour l’utiliser comme provider.
+- Le private_network avec IP fixe est surtout utilisé avec VirtualBox/VMware. Avec QEMU, ce n’est pas nécessaire puisque l’accès à GitLab se fait via un port forward (localhost:8080).
+- config.vm.synced_folder était inutile : Vagrant monte déjà automatiquement le projet dans /vagrant, ce qui suffit pour Ansible (ansible_local lit directement les playbooks depuis ce dossier).
+
+### 2. Create and provision a virtual machine (VM)
+
+On va donc ici utiliser la commande "vagrant up" 
+
+Voici les captures d'écran des commandes et résultat obtenu :
+
+![vm installé](./image/vm installé.jpeg)
+![vm installé 2](./image/vm installé 2.jpeg)
+![vm installé 3](./image/vm installé 3.jpeg)
+![vm installé 4](./image/vm installé 4.jpeg)
+
+### 3. Test the installation 
+
+Pour valider l’installation, nous avons vérifié que les services GitLab sont actifs avec sudo gitlab-ctl status (nginx, postgresql, redis, puma, sidekiq, etc.). Ensuite, nous avons testé la réponse HTTP locale via curl -I http://127.0.0.1/ et validé le endpoint de supervision /-/health retournant GitLab OK. Ces contrôles confirment que GitLab est correctement déployé et opérationnel sur la VM
+
+![test gitlab](./image/test gitlab.jpeg)
+
+L’installation de GitLab a été validée par l’accès à l’interface web via http://localhost:8080. L’authentification avec l’utilisateur root et le mot de passe généré automatiquement confirme que l’application est correctement déployée et opérationnelle.
+
+### 4. Instructions for updating playbooks
+
+Si on doit modifier l'installation, nous devons modifier les playbooks, les charger sur les machines virtuelles et exécuter le provisionnement avec les commandes :
+
+- vagrant rsync
+- vagrant provision
+
+## Part 3. Declarative - Configure a health check for GitLab
+
+1.  Read the [GitLab Health Check doc] 
+2. Run a health check using `curl`:
+  ![curl1](./image/curl1.jpeg)
+  ![curl2](./image/curl2.jpeg)
+
+3. Read [`lab/part-2/playbooks/roles/gitlab/healthchecks/tasks/main.yml`]
+
+4. Run the `gitlab/healthcheck` role:
+  ![healthcheck](./image/healthcheck.jpeg)
+  ![ansible healthcheck](./image/ansible healthcheck.jpeg)
+
+5. Run the 2 other kinds of health checks in the playbook (using the [uri module](https://docs.ansible.com/ansible/latest/modules/uri_module.html)):
+  - [Readiness check]
+  - [Liveness check] :
+        ![readiness-et-liveness](./image/curl2.jpeg)
+
+6. Print the results of the health checks in the console.
+  ![resultat](./image/resultat.jpeg)
+
+## Bonus task
+
+L'objectif est d'affichez un message personnalisé indiquant uniquement les services dysfonctionnels détectés lors du contrôle de disponibilité, le cas échéant. Pour tester l'affichage, arrêtez `redis` sur le nœud à l'aide de la commande `sudo gitlab-ctl stop redis` avant de relancer le playbook. Conseil : utilisez l'attribut `json` de la réponse.
+  ![bonus1](./image/bonus1.jpeg)
+  ![bonus2](./image/bonus2.jpeg)
+  ![bonus3](./image/bonus3.jpeg)
+  Modification du main de Yaml 
+  ![modif-main_yaml](./image/modif-main_yaml.jpeg)
+  Redis
+  ![redis-OK](./image/redis-OK.jpeg)
+
+

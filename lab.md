@@ -4,7 +4,7 @@
 Continuous testing
 
 ## Objectives
-
+red
 1. Use prepared User API application and run tests
 2. Using test-driven development (TDD) create GET user functionality
 
