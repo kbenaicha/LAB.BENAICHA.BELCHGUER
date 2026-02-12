@@ -197,9 +197,9 @@ Si on doit modifier l'installation, nous devons modifier les playbooks, les char
 ## Bonus task
 
 L'objectif est d'affichez un message personnalisé indiquant uniquement les services dysfonctionnels détectés lors du contrôle de disponibilité, le cas échéant. Pour tester l'affichage, arrêtez `redis` sur le nœud à l'aide de la commande `sudo gitlab-ctl stop redis` avant de relancer le playbook. Conseil : utilisez l'attribut `json` de la réponse.
-  ![bonus1](./../image/bonus1.jpeg)
-  ![bonus2](./../image/bonus2.jpeg)
-  ![bonus3](./../image/bonus3.jpeg)
+  ![objectif ](./../image/bonus1.jpeg)
+  ![manipulation](./../image/bonus2.jpeg)
+  ![résultats observé ](./../image/bonus3.jpeg)
   Modification du main de Yaml 
   ![modif-main_yaml](./../image/modif-main_yaml.jpeg)
   Redis
