@@ -42,6 +42,7 @@ end
 vagrant up --provider=qemu
 
 ## will check VMs status
+```bash
 vagrant status 
 
  stop the VMs
@@ -152,10 +153,10 @@ On va donc ici utiliser la commande "vagrant up"
 
 Voici les captures d'écran des commandes et résultat obtenu :
 
-![vm installé](./image/vm installé.jpeg)
-![vm installé 2](./image/vm installé 2.jpeg)
-![vm installé 3](./image/vm installé 3.jpeg)
-![vm installé 4](./image/vm installé 4.jpeg)
+![vm installé](./../image/vm installé.jpeg)
+![vm installé 2](./../image/vm installé 2.jpeg)
+![vm installé 3](./../image/vm installé 3.jpeg)
+![vm installé 4](./../image/vm installé 4.jpeg)
 
 ### 3. Test the installation 
 
@@ -176,32 +177,32 @@ Si on doit modifier l'installation, nous devons modifier les playbooks, les char
 
 1.  Read the [GitLab Health Check doc] 
 2. Run a health check using `curl`:
-  ![curl1](./image/curl1.jpeg)
-  ![curl2](./image/curl2.jpeg)
+  ![curl1](./../image/curl1.jpeg)
+  ![curl2](./../image/curl2.jpeg)
 
 3. Read [`lab/part-2/playbooks/roles/gitlab/healthchecks/tasks/main.yml`]
 
 4. Run the `gitlab/healthcheck` role:
-  ![healthcheck](./image/healthcheck.jpeg)
-  ![ansible healthcheck](./image/ansible healthcheck.jpeg)
+  ![healthcheck](./../image/healthcheck.jpeg)
+  ![ansible healthcheck](./../image/ansible healthcheck.jpeg)
 
 5. Run the 2 other kinds of health checks in the playbook (using the [uri module](https://docs.ansible.com/ansible/latest/modules/uri_module.html)):
   - [Readiness check]
   - [Liveness check] :
-        ![readiness-et-liveness](./image/curl2.jpeg)
+        ![readiness-et-liveness](./../image/curl2.jpeg)
 
 6. Print the results of the health checks in the console.
-  ![resultat](./image/resultat.jpeg)
+  ![resultat](./../image/resultat.jpeg)
 
 ## Bonus task
 
 L'objectif est d'affichez un message personnalisé indiquant uniquement les services dysfonctionnels détectés lors du contrôle de disponibilité, le cas échéant. Pour tester l'affichage, arrêtez `redis` sur le nœud à l'aide de la commande `sudo gitlab-ctl stop redis` avant de relancer le playbook. Conseil : utilisez l'attribut `json` de la réponse.
-  ![bonus1](./image/bonus1.jpeg)
-  ![bonus2](./image/bonus2.jpeg)
-  ![bonus3](./image/bonus3.jpeg)
+  ![bonus1](./../image/bonus1.jpeg)
+  ![bonus2](./../image/bonus2.jpeg)
+  ![bonus3](./../image/bonus3.jpeg)
   Modification du main de Yaml 
-  ![modif-main_yaml](./image/modif-main_yaml.jpeg)
+  ![modif-main_yaml](./../image/modif-main_yaml.jpeg)
   Redis
-  ![redis-OK](./image/redis-OK.jpeg)
+  ![redis-OK](./../image/redis-OK.jpeg)
 
 
