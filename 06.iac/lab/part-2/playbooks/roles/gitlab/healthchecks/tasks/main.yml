@@ -1,0 +1,91 @@
+---
+# OPTIONAL TASKS (needed to run checks from the host machine)
+# - name: Uncomment the GitLab IP whitelist line
+#   replace:
+#     path: /etc/gitlab/gitlab.rb
+#     regexp: '^# (gitlab_rails\[''monitoring_whitelist''\] = \[.*)\]$'
+#     replace: '\1, ''20.20.20.1'']'
+
+# - name: Reconfigure GitLab
+#   command: gitlab-ctl reconfigure
+
+# - name: Restart unicorn
+#   command: gitlab-ctl restart unicorn
+#   retries: 2
+# END OF OPTIONAL TASKS
+
+- name: Check GitLab health
+  uri:
+    url: http://127.0.0.1/-/health
+    return_content: yes
+  register: gitlab_health
+  tags: healthcheck
+
+- name: Print GitLab health
+  debug:
+    msg: "{{ gitlab_health.content }}"
+  tags: healthcheck
+
+- name: Readiness check (JSON)
+  uri:
+    url: http://127.0.0.1/-/readiness
+    return_content: yes
+  register: readiness
+  tags: healthcheck
+
+- name: Extract failing services
+  set_fact:
+    failing_services: >-
+      {{
+        readiness.json
+        | dict2items
+        | selectattr('value', 'ne', 'ok')
+        | list
+      }}
+  tags: healthcheck
+
+- name: Readiness OK (no failing services)
+  debug:
+    msg: "Readiness check OK : aucun service en échec."
+  when: failing_services | length == 0
+  tags: healthcheck
+
+- name: Readiness FAILED (list failing services)
+  debug:
+    msg: "Service en échec : {{ item.key }} (statut={{ item.value }})"
+  loop: "{{ failing_services }}"
+  when: failing_services | length > 0
+  tags: healthcheck
+- name: Readiness check (detailed)
+  uri:
+    url: "http://127.0.0.1/-/readiness?all=1"
+    return_content: yes
+  register: readiness
+  tags: healthcheck
+
+- name: Extract failing checks (status=failed)
+  set_fact:
+    failing_checks: >-
+      {{
+        readiness.json
+        | dict2items
+        | rejectattr('key', 'equalto', 'status')
+        | selectattr('value', 'is', 'sequence')
+        | selectattr('value.0.status', 'defined')
+        | selectattr('value.0.status', 'equalto', 'failed')
+        | list
+      }}
+  tags: healthcheck
+
+- name: Print failing checks only
+  debug:
+    msg: "Check en échec : {{ item.key }} | Message : {{ item.value[0].message | default('N/A') }}"
+  loop: "{{ failing_checks }}"
+  when: failing_checks | length > 0
+  tags: healthcheck
+
+- name: Readiness OK (no failing checks)
+  debug:
+    msg: "Readiness OK : aucun check en échec."
+  when: failing_checks | length == 0
+  tags: healthcheck

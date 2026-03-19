@@ -1,0 +1,35 @@
+- name: Install required packages (Debian/Ubuntu)
+  apt:
+    name:
+      - curl
+      - ca-certificates
+      - openssh-server
+      - tzdata
+      - perl
+    state: present
+    update_cache: yes
+  when: ansible_os_family == "Debian"
+
+- name: Install required packages (RHEL/Rocky/CentOS)
+  dnf:
+    name:
+      - curl
+      - ca-certificates
+      - openssh-server
+      - tzdata
+      - perl
+    state: present
+  when: ansible_os_family == "RedHat"
+   
+- name: Add GitLab repository (Ubuntu)
+  shell: curl https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | bash
+  args:
+    executable: /bin/bash
+  when: ansible_os_family == "Debian"
+
+- name: Install GitLab CE (Ubuntu)
+  apt:
+    name: gitlab-ce
+    state: present
+  when: ansible_os_family == "Debian"
+

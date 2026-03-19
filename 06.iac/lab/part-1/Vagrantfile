@@ -1,0 +1,22 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.define "centos_server" do |server|
+    server.vm.box = "perk/ubuntu-2204-arm64"
+
+    # IMPORTANT: QEMU uniquement
+    server.vm.provider "qemu" do |qe|
+      qe.ssh_port = "50022"
+      qe.memory = 2048
+      qe.cpus = 1
+    end
+
+   server.vm.provision "shell", inline: <<-SHELL
+  echo I am provisioning...
+  date | sudo tee /etc/vagrant_provisioned_at
+SHELL
+
+
+  end
+end
